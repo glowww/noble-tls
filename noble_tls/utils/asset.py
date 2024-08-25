@@ -60,7 +60,7 @@ def generate_asset_name(
         else:
             asset_arch = 'amd64'
 
-        if system_os == 'linux':
+        if system_os == 'linux' and architecture != "aarch64":
             distro_name = get_distro()
             if distro_name.lower() in {"ubuntu", "debian"}:
                 system_os = f"{system_os}-ubuntu"
