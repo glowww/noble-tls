@@ -448,8 +448,6 @@ def extract_cookies_to_jar(
     response_cookie_jar = cookiejar_from_dict({})
     if "Set-Cookie" not in response_headers and "set-cookie" not in response_headers:
         return response_cookie_jar
-    
-    has_cookies = False
   
     # mimic HTTPMessage
     http_message = HTTPMessage()
@@ -467,3 +465,4 @@ def extract_cookies_to_jar(
         cookie_jar.set_cookie(cookie)
 
     return response_cookie_jar
+
