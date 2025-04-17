@@ -41,7 +41,7 @@ class Session:
             catch_panics: Optional = False,
             debug: Optional = False,
             transportOptions: Optional[dict] = None,
-            connectHeaders: Optional[dict] = None
+            connectHeaders: Optional[dict] = None,
             executor: ThreadPoolExecutor = None
     ) -> None:
         self.client_identifier = client.value if client else None
