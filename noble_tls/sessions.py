@@ -2,6 +2,9 @@
 import asyncio
 import base64
 import urllib.parse
+import random
+import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Optional, Union
 
 from .encoding import lib_response_decoder, json_encoder
@@ -39,6 +42,7 @@ class Session:
             debug: Optional = False,
             transportOptions: Optional[dict] = None,
             connectHeaders: Optional[dict] = None
+            executor: ThreadPoolExecutor = None
     ) -> None:
         self.client_identifier = client.value if client else None
         self._session_id = random_session_id()
@@ -271,6 +275,8 @@ class Session:
 
         # loop
         self.loop = asyncio.get_event_loop()
+        
+        self.executor = executor or ThreadPoolExecutor()
 
     @property
     def timeout(self):
@@ -413,11 +419,11 @@ class Session:
 
             loop = asyncio.get_event_loop()
             # this is a pointer to the response
-            response = await loop.run_in_executor(None, request, json_encoder.encode(request_payload))
+            response = await loop.run_in_executor(self.executor, request, json_encoder.encode(request_payload))
             # convert response bytes to json
             response_object = lib_response_decoder.decode(response)
             # free the memory
-            loop.run_in_executor(None, free_memory, response_object.id.encode('utf-8'))
+            loop.run_in_executor(self.executor, free_memory, response_object.id.encode('utf-8'))
 
             # --- Response -------------------------------------------------------------------------------------------------
             # Error handling

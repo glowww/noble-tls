@@ -6,6 +6,10 @@ import distro
 
 
 def root_dir():
+
+    if os.environ.get("IS_REMOTE_RAY_TASK", False):
+        return os.getcwd()
+    
     # Get the absolute path of the current file
     current_file_path = os.path.abspath(__file__)
 
@@ -60,7 +64,7 @@ def generate_asset_name(
         else:
             asset_arch = 'amd64'
 
-        if system_os == 'linux':
+        if system_os == 'linux' and architecture != "aarch64":
             distro_name = get_distro()
             if distro_name.lower() in {"ubuntu", "debian"}:
                 system_os = f"{system_os}-ubuntu"

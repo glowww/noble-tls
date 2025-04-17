@@ -446,8 +446,9 @@ def extract_cookies_to_jar(
         response_headers: dict
     ) -> RequestsCookieJar:
     response_cookie_jar = cookiejar_from_dict({})
-
-    req = MockRequest(request_url, request_headers)
+    if "Set-Cookie" not in response_headers and "set-cookie" not in response_headers:
+        return response_cookie_jar
+  
     # mimic HTTPMessage
     http_message = HTTPMessage()
     http_message._headers = []
@@ -457,7 +458,11 @@ def extract_cookies_to_jar(
                 (header_name, header_value)
             )
     res = MockResponse(http_message)
-    response_cookie_jar.extract_cookies(res, req)
+    req = MockRequest(request_url, request_headers)
+    
+    for cookie in response_cookie_jar.make_cookies(res, req):
+        response_cookie_jar.set_cookie(cookie)
+        cookie_jar.set_cookie(cookie)
 
-    merge_cookies(cookie_jar, response_cookie_jar)
     return response_cookie_jar
+
