@@ -13,7 +13,7 @@ repo = 'tls-client'
 url = f'https://api.github.com/repos/{owner}/{repo}/releases/latest'
 root_directory = root_dir()
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
-
+CURRENT_VERSION = "bh_1.0.0"
 
 def auto_retry(retries: int):
     def decorator(func):
@@ -125,8 +125,9 @@ def read_version_info():
 
 
 async def download_if_necessary():
-    version_num, asset_url = await get_latest_release()
-    if not asset_url or not version_num:
+    # version_num, asset_url = await get_latest_release()
+    version_num = CURRENT_VERSION
+    if not version_num:
         raise TLSClientException(f"Version {version_num} does not have any assets.")
 
     asset_name = generate_asset_name(custom_part=repo, version=version_num)
