@@ -64,11 +64,13 @@ def generate_asset_name(
         else:
             asset_arch = 'amd64'
 
-        # Currently disabled as it causes more problems than it solves
-        if False and system_os == 'linux' and architecture != "aarch64":
-            distro_name = get_distro()
-            if distro_name.lower() in {"ubuntu", "debian"}:
-                system_os = f"{system_os}-ubuntu"
+        if system_os == 'linux' and architecture != "aarch64":
+            if os.getenv("GITHUB_ACTIONS") == "true":
+                system_os = f"{system_os}-github"
+            else:
+                distro_name = get_distro()
+                if distro_name.lower() in {"ubuntu", "debian"}:
+                    system_os = f"{system_os}-ubuntu"
 
     return f"{custom_part}-{system_os}-{asset_arch}-{version}{file_extension}"
 
