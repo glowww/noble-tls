@@ -20,6 +20,12 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests"]),
+    include_package_data=True,
+    package_data={
+        "noble_tls": [
+            "dependencies/*",
+        ],
+    },
     install_requires=["httpx", "distro", "requests"],
     classifiers=[
         "Environment :: Web Environment",
