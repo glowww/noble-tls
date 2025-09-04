@@ -50,7 +50,7 @@ def load_asset():
     asset_name = generate_asset_name(version=current_version)
     asset_path = f'{root_dir()}/dependencies/{asset_name}'
     if not os.path.exists(asset_path):
-        raise TLSClientException(f"Unable to find asset {asset_name} for version {current_version}.")
+        raise TLSClientException(f"Unable to find asset {asset_name} for version {current_version} - {asset_path}")
 
     return asset_name
 

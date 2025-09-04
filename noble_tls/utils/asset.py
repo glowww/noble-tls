@@ -17,8 +17,7 @@ def root_dir():
     current_dir_path = os.path.dirname(current_file_path)
 
     # Navigate up one level to get the 'root_dir'
-    root_dir = os.path.dirname(current_dir_path)
-    return root_dir
+    return os.path.dirname(current_dir_path)
 
 
 def get_system_platform():
