@@ -7,8 +7,8 @@ import distro
 
 def root_dir():
 
-    if os.environ.get("IS_REMOTE_RAY_TASK", False):
-        return os.getcwd()
+    # if os.environ.get("IS_REMOTE_RAY_TASK", False):
+    #     return os.getcwd()
     
     # Get the absolute path of the current file
     current_file_path = os.path.abspath(__file__)
