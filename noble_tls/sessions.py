@@ -429,11 +429,11 @@ class Session:
             current_response = build_response(response_object, response_cookie_jar)
             # check for redirect
             if allow_redirects:
-                if 'Location' in (ci_headers := current_response.headers) and current_response.status_code in (
+                if 'Location' in (headers := current_response.headers) and current_response.status_code in (
                         300, 301, 302, 303, 307, 308
                 ):
                     history.append(current_response)
-                    url = ci_headers['Location']
+                    url = headers['Location']
                 else:
                     break
             else:
