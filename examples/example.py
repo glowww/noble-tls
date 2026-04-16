@@ -1,10 +1,26 @@
 import asyncio, noble_tls
 from noble_tls.utils.identifiers import Client
 async def main():
-    session = noble_tls.Session(Client.CHROME_133)
+    session = noble_tls.Session(Client.FIREFOX_147_PSK)
     session.proxies = {"http": "http://localhost:8083"}
-    await session.get("https://httpbin.org/cookies/set/a/b", insecure_skip_verify=True)
-    await session.get("https://httpbin.org/cookies/set/b/a123",  insecure_skip_verify=True)
-    print((await session.get("https://httpbin.org/get", headers={"Cookie": None, "yarrak_1": "a", "yarrak_2": "b"},insecure_skip_verify=True)).json())
+
+    response = await session.get(
+        "https://www.bet365.com/",
+        headers={
+            "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "accept-language": "en-US,en;q=0.9",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "sec-gpc": "1",
+            "upgrade-insecure-requests": "1",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "sec-fetch-user": "?1",
+            "priority": "u=0, i",
+            "te": "trailers",
+        },
+        insecure_skip_verify=True
+    )
 
 asyncio.run(main())
