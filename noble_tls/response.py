@@ -9,18 +9,33 @@ from noble_tls.utils.structures import CaseInsensitiveDict
 from .cookies import cookiejar_from_dict
 
 
+class Protocol(Enum):
+    HTTP_1_1 = "HTTP/1.1"
+    HTTP_2 = "HTTP/2.0"
+    HTTP_3 = "HTTP/3.0"
+
+    @classmethod
+    def from_string(cls, value: str) -> "Protocol | None":
+        if not value:
+            return None
+        for member in cls:
+            if member.value == value:
+                return member
+        return None
+
+
 class Response:
-    """Represents the response to an HTTP request."""
 
     def __init__(self):
         self.url: Optional[str] = None
-        self.status_code: Optional[int] = None  # The HTTP status code.
-        self.text: Optional[str] = None  # The text content of the response.
-        self.headers: CaseInsensitiveDict = CaseInsensitiveDict()  # Case-insensitive response headers.
-        self.cookies = cookiejar_from_dict({})  # Cookies sent back by the server.
-        self._content: Optional[bytes] = None  # The byte content of the response.
-        self._content_consumed: bool = False  # Tracks if the content has been consumed.
+        self.status_code: Optional[int] = None
+        self.text: Optional[str] = None
+        self.headers: CaseInsensitiveDict = CaseInsensitiveDict()
+        self.cookies = cookiejar_from_dict({})
+        self._content: Optional[bytes] = None
+        self._content_consumed: bool = False
         self.history = []
+        self.used_protocol: Optional[Protocol] = None
 
     def __enter__(self):
         return self
@@ -29,11 +44,9 @@ class Response:
         return f"<Response [{self.status_code}]>"
 
     def json(self, **kwargs) -> Union[Dict, list]:
-        """Parses the text content of the response to JSON."""
         return json.loads(self.text, **kwargs)
 
     def raise_for_status(self):
-        """Raises an HTTPError if the HTTP request returned an unsuccessful status code."""
         if 400 <= self.status_code < 500:
             raise HTTPError(f'Client Error: {self.status_code} for url: {self.url}')
         elif 500 <= self.status_code < 600:
@@ -41,7 +54,6 @@ class Response:
 
     @property
     def content(self) -> bytes:
-        """Lazily loads the content of the response, in bytes."""
         if self._content is None:
             if self._content_consumed:
                 raise RuntimeError("The content for this response was already consumed.")
@@ -57,11 +69,11 @@ def build_response(res: LibraryResponse, res_cookies) -> Response:
     response.status_code = res.status  # Default to 0 if status is not provided.
     response.text = res.body  # Default to empty string if body is not provided.
 
-    # Process headers, ensuring single values are not wrapped in a list.
     response_headers = CaseInsensitiveDict()
     for key, value in res.headers.items():
         response_headers[key] = value[0] if len(value) == 1 else value
     response.headers = response_headers
 
-    response.cookies = res_cookies  # Assign the provided cookies to the response.
+    response.cookies = res_cookies
+    response.used_protocol = Protocol.from_string(res.get("usedProtocol"))
     return response
