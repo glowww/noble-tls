@@ -40,6 +40,7 @@ class CaseInsensitiveDict(MutableMapping):
     def __setitem__(self, key, value):
         # Use the lowercased key for lookups, but store the actual
         # key alongside the value.
+        # for what?
         self._store[key.lower()] = (key, value)
 
     def __getitem__(self, key):
