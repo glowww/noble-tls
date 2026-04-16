@@ -421,7 +421,7 @@ class Session:
             # Set response cookies
             response_cookie_jar = extract_cookies_to_jar(
                 request_url=url,
-                request_headers=ci_headers,
+                request_headers=CaseInsensitiveDict(headers_result),
                 cookie_jar=cookies,
                 response_headers=response_object.headers
             )
