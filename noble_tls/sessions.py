@@ -34,12 +34,11 @@ class Session:
             pseudo_header_order: Optional[list] = None,  # Optional[list[str]
             connection_flow: Optional[int] = None,
             priority_frames: Optional[list] = None,
-            header_order: Optional[list] = None,  # Optional[list[str]]
             header_priority: Optional[dict] = None,  # Optional[list[str]]
-            random_tls_extension_order: Optional = False,
-            force_http1: Optional = False,
-            catch_panics: Optional = False,
-            debug: Optional = False,
+            random_tls_extension_order: Optional[bool] = False,
+            force_http1: Optional[bool] = False,
+            catch_panics: Optional[bool] = False,
+            debug: Optional[bool] = False,
             transportOptions: Optional[dict] = None,
             connectHeaders: Optional[dict] = None,
             executor: ThreadPoolExecutor = None
@@ -48,15 +47,6 @@ class Session:
         self._session_id = random_session_id()
         # --- Standard Settings ----------------------------------------------------------------------------------------
 
-        # Case-insensitive dictionary of headers, send on each request
-        self.headers = CaseInsensitiveDict(
-            {
-                "User-Agent": f"noble-tls/{__version__}",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept": "*/*",
-                "Connection": "keep-alive",
-            }
-        )
 
         # Example:
         # {
@@ -245,7 +235,6 @@ class Session:
         #   "key1",
         #   "key2"
         # ]
-        self.header_order = header_order
 
         # Header Priority
         # Example:
@@ -319,6 +308,9 @@ class Session:
         # --- Request Body ---------------------------------------------------------------------------------------------
         # Prepare request body - build request body
         # Data has priority. JSON is only used if data is None.
+
+
+        
         if data is None and json is not None:
             if type(json) in [dict, list]:
                 json = json_encoder.encode(json)
@@ -330,26 +322,23 @@ class Session:
         else:
             request_body = data
             content_type = None
-        # set content type if it isn't set
-        if content_type is not None and "content-type" not in self.headers:
-            self.headers["Content-Type"] = content_type
 
         # --- Headers --------------------------------------------------------------------------------------------------
-        if self.headers is None:
-            headers = CaseInsensitiveDict(headers)
-        elif headers is None:
-            headers = self.headers
-        else:
-            merged_headers = CaseInsensitiveDict(self.headers)
-            merged_headers.update(headers)
+        
+        # This is unnecessary imo
+        ci_headers = CaseInsensitiveDict(headers)
 
-            # Remove items, where the key or value is set to None.
-            none_keys = [k for (k, v) in merged_headers.items() if v is None or k is None]
-            for key in none_keys:
-                del merged_headers[key]
+        if content_type is not None:
+            ci_headers["content-type"] = content_type
 
-            headers = merged_headers
+        headers_result = {}
+        header_order = []
 
+        # Set headers like cookie, content-length to None to set their header order
+        for key, value in ci_headers.lower_items():
+            header_order.append(key)
+            if value is not None:
+                headers_result[key] = value
         # --- Cookies --------------------------------------------------------------------------------------------------
         cookies = cookies or {}
         # Merge with session cookies
@@ -383,8 +372,8 @@ class Session:
                 "forceHttp1": self.force_http1,
                 "withDebug": self.debug,
                 "catchPanics": self.catch_panics,
-                "headers": dict(headers),
-                "headerOrder": self.header_order,
+                "headers": headers_result,
+                "headerOrder": header_order,
                 "insecureSkipVerify": insecure_skip_verify,
                 "isByteRequest": is_byte_request,
                 "isByteResponse": is_byte_response,
@@ -432,7 +421,7 @@ class Session:
             # Set response cookies
             response_cookie_jar = extract_cookies_to_jar(
                 request_url=url,
-                request_headers=headers,
+                request_headers=ci_headers,
                 cookie_jar=cookies,
                 response_headers=response_object.headers
             )
@@ -440,11 +429,11 @@ class Session:
             current_response = build_response(response_object, response_cookie_jar)
             # check for redirect
             if allow_redirects:
-                if 'Location' in (headers := current_response.headers) and current_response.status_code in (
+                if 'Location' in (ci_headers := current_response.headers) and current_response.status_code in (
                         300, 301, 302, 303, 307, 308
                 ):
                     history.append(current_response)
-                    url = headers['Location']
+                    url = ci_headers['Location']
                 else:
                     break
             else:
