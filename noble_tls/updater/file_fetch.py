@@ -13,7 +13,7 @@ repo = 'tls-client'
 url = f'https://api.github.com/repos/{owner}/{repo}/releases/latest'
 root_directory = root_dir()
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
-CURRENT_VERSION = "bh_1.0.0"
+CURRENT_VERSION = "bh_1.0.1"
 
 def auto_retry(retries: int):
     def decorator(func):

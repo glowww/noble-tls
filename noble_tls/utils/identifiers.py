@@ -54,7 +54,7 @@ class Client(Enum):
     FIREFOX_147 = 'firefox_147'
     FIREFOX_147_PSK = 'firefox_147_PSK'
     FIREFOX_148 = 'firefox_148'
-    FIREFOX_CUSTOM = "firefox_147_PSK" # TODO: Implement firefox_custom
+    FIREFOX_CUSTOM = "firefox_custom"
     OPERA_89 = 'opera_89'
     OPERA_90 = 'opera_90'
     OPERA_91 = 'opera_91'
