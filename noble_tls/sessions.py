@@ -383,6 +383,15 @@ class Session:
                 "requestMethod": method,
                 "requestBody": base64.b64encode(request_body).decode() if is_byte_request else request_body,
                 "requestCookies": request_cookies,
+                # Opt into the tls-client cookiejar. Upstream PR #224
+                # (bogdanfinn/tls-client 71e7aa4) renamed the flag from
+                # WithDefaultCookieJar to WithCustomCookieJar and flipped the
+                # default to fhttp's RFC 6265 jar, which silently drops cookies
+                # whose Domain attribute doesn't match the URL host under the
+                # stricter rules (e.g. ".example.com" for a request to
+                # "sub.example.com"). The custom jar the old default used is
+                # more permissive and matches what scrapers expect.
+                "withCustomCookieJar": True,
                 "timeoutSeconds": timeout_seconds,
                 "transportOptions": self.transportOptions,
                 "connectHeaders": self.connectHeaders
