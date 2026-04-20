@@ -34,6 +34,7 @@ class Session:
             pseudo_header_order: Optional[list] = None,  # Optional[list[str]
             connection_flow: Optional[int] = None,
             priority_frames: Optional[list] = None,
+            header_order: Optional[list] = None,  # Optional[list[str]]
             header_priority: Optional[dict] = None,  # Optional[list[str]]
             random_tls_extension_order: Optional[bool] = False,
             force_http1: Optional[bool] = False,
@@ -47,6 +48,19 @@ class Session:
         self._session_id = random_session_id()
         # --- Standard Settings ----------------------------------------------------------------------------------------
 
+        # Case-insensitive dictionary of headers, sent on each request.
+        # Keep a real browser-like default set so the tls-client Go layer can
+        # place them before caller-provided headers via the header_order we
+        # build below. Scrapers that rely on fingerprinting (Akamai / Datadome /
+        # nginx 403) regress when these drop off the wire.
+        self.headers = CaseInsensitiveDict(
+            {
+                "User-Agent": f"noble-tls/{__version__}",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+            }
+        )
 
         # Example:
         # {
@@ -235,6 +249,7 @@ class Session:
         #   "key1",
         #   "key2"
         # ]
+        self.header_order = header_order
 
         # Header Priority
         # Example:
@@ -324,19 +339,32 @@ class Session:
             content_type = None
 
         # --- Headers --------------------------------------------------------------------------------------------------
-        
-        # This is unnecessary imo
-        ci_headers = CaseInsensitiveDict(headers)
+        # Merge session-level default headers with the caller's headers. The
+        # session defaults (User-Agent, Accept-Encoding, Accept, Connection)
+        # come first so caller keys slot in after them and we end up with a
+        # browser-realistic header order on the wire. Callers still override
+        # any default by repeating the key.
+        if self.headers is None:
+            ci_headers = CaseInsensitiveDict(headers)
+        elif headers is None:
+            ci_headers = CaseInsensitiveDict(self.headers)
+        else:
+            ci_headers = CaseInsensitiveDict(self.headers)
+            ci_headers.update(headers)
+            none_keys = [k for (k, v) in ci_headers.items() if v is None or k is None]
+            for key in none_keys:
+                del ci_headers[key]
 
-        if content_type is not None:
-            ci_headers["content-type"] = content_type
+        if content_type is not None and "content-type" not in ci_headers:
+            ci_headers["Content-Type"] = content_type
 
         headers_result = {}
-        header_order = []
+        # If the caller (or Session) provided an explicit header_order, honor
+        # it; otherwise leave it unset so the tls-client binary's built-in
+        # ordering for the chosen profile (Chrome/Firefox/Safari) takes over.
+        header_order = list(self.header_order) if self.header_order else None
 
-        # Set headers like cookie, content-length to None to set their header order
         for key, value in ci_headers.lower_items():
-            header_order.append(key)
             if value is not None:
                 headers_result[key] = value
         # --- Cookies --------------------------------------------------------------------------------------------------
