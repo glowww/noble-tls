@@ -431,12 +431,13 @@ class Session:
             if response_object.status == 0:
                 raise TLSClientException(response_object.body)
             # Set response cookies
-            response_cookie_jar = extract_cookies_to_jar(
-                request_url=url,
-                request_headers=CaseInsensitiveDict(headers_result),
-                cookie_jar=cookies,
-                response_headers=response_object.headers
-            )
+            if not without_cookie_jar:
+                response_cookie_jar = extract_cookies_to_jar(
+                    request_url=url,
+                    request_headers=CaseInsensitiveDict(headers_result),
+                    cookie_jar=cookies,
+                    response_headers=response_object.headers
+                )
             # build response class
             current_response = build_response(response_object, response_cookie_jar)
             # check for redirect
