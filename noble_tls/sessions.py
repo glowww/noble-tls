@@ -289,7 +289,9 @@ class Session:
             timeout_seconds: Optional[int] = None,
             timeout: Optional[int] = None,
             proxy: Optional[dict] = None,  # Optional[dict[str, str]]
-            is_byte_response: Optional[bool] = False
+            is_byte_response: Optional[bool] = False,
+            with_custom_cookie_jar: Optional[bool] = True,
+            without_cookie_jar: Optional[bool] = False
     ):
 
         # --- Timeout --------------------------------------------------------------------------------------------------
@@ -391,7 +393,8 @@ class Session:
                 # stricter rules (e.g. ".example.com" for a request to
                 # "sub.example.com"). The custom jar the old default used is
                 # more permissive and matches what scrapers expect.
-                "withCustomCookieJar": True,
+                "withCustomCookieJar": with_custom_cookie_jar,
+                "withoutCookieJar": without_cookie_jar,
                 "timeoutSeconds": timeout_seconds,
                 "transportOptions": self.transportOptions,
                 "connectHeaders": self.connectHeaders
