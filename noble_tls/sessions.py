@@ -438,6 +438,8 @@ class Session:
                     cookie_jar=cookies,
                     response_headers=response_object.headers
                 )
+            else:
+                response_cookie_jar = cookiejar_from_dict({})
             # build response class
             current_response = build_response(response_object, response_cookie_jar)
             # check for redirect
