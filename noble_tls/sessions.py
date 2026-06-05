@@ -342,9 +342,14 @@ class Session:
             if value is not None:
                 headers_result[key] = value
         # --- Cookies --------------------------------------------------------------------------------------------------
-        cookies = cookies or {}
+        cookies = cookies if cookies is not None else {}
+
         # Merge with session cookies
-        cookies = merge_cookies(self.cookies, cookies)
+        if without_cookie_jar:
+            cookies = merge_cookies(self.cookies.copy(), cookies)
+        else:
+            cookies = merge_cookies(self.cookies, cookies)
+
         # turn cookie jar into dict
         # in the cookie value the " gets removed, because the fhttp library in golang doesn't accept the character
         request_cookies = [
@@ -431,15 +436,12 @@ class Session:
             if response_object.status == 0:
                 raise TLSClientException(response_object.body)
             # Set response cookies
-            if not without_cookie_jar:
-                response_cookie_jar = extract_cookies_to_jar(
-                    request_url=url,
-                    request_headers=CaseInsensitiveDict(headers_result),
-                    cookie_jar=cookies,
-                    response_headers=response_object.headers
-                )
-            else:
-                response_cookie_jar = cookiejar_from_dict({})
+            response_cookie_jar = extract_cookies_to_jar(
+                request_url=url,
+                request_headers=CaseInsensitiveDict(headers_result),
+                cookie_jar=cookies,
+                response_headers=response_object.headers
+            )
             # build response class
             current_response = build_response(response_object, response_cookie_jar)
             # check for redirect
