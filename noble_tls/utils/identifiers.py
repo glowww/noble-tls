@@ -26,6 +26,8 @@ class Client(Enum):
     CHROME_144_PSK = 'chrome_144_PSK'
     CHROME_146 = 'chrome_146'
     CHROME_146_PSK = 'chrome_146_PSK'
+    CHROME_150 = "chrome_150"
+    CHROME_150_PSK = "chrome_150_PSK"
     BRAVE_146 = 'brave_146'
     BRAVE_146_PSK = 'brave_146_PSK'
     SAFARI_15_6_1 = 'safari_15_6_1'
@@ -54,6 +56,8 @@ class Client(Enum):
     FIREFOX_147 = 'firefox_147'
     FIREFOX_147_PSK = 'firefox_147_PSK'
     FIREFOX_148 = 'firefox_148'
+    FIREFOX_154 = "firefox_154"
+    FIREFOX_154_PSK = "firefox_154_PSK"
     FIREFOX_CUSTOM = "firefox_custom"
     OPERA_89 = 'opera_89'
     OPERA_90 = 'opera_90'
