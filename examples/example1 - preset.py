@@ -17,14 +17,15 @@ from noble_tls import Client
 
 
 async def main():
-    await noble_tls.update_if_necessary()
     session = noble_tls.Session(
-        client=Client.NIKE_IOS_MOBILE,
+        client=Client.FIREFOX_154,
         debug=True,
     )
 
     res = await session.get(
-        "https://bit.ly/3K5GY8J",
+        "https://api.ipify.org",
+        proxy={"http": "http://localhost:8083"},
+        insecure_skip_verify=True
     )
     print("Status code:", res.status_code)
     print("Headers:", res.text)
