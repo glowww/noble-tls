@@ -18,7 +18,7 @@ from noble_tls import Client
 
 async def main():
     session = noble_tls.Session(
-        client=Client.FIREFOX_154,
+        client=Client.FIREFOX_154_PSK,
         debug=True,
     )
 
